@@ -1,0 +1,12 @@
+{
+  "touchpoints": [
+    {"name": "Hero Banner", "system": "Storyblok", "needs_image": true, "fields": ["image_url", "campaign_name", "link_url", "start_date", "end_date"]},
+    {"name": "Menu Navigation Banner", "system": "Storyblok", "needs_image": true, "fields": ["image_url", "campaign_name", "start_date", "end_date"]},
+    {"name": "Sale Navigation Tab", "system": "Storyblok", "needs_image": false, "fields": ["campaign_name", "url_slug", "start_date", "end_date"]},
+    {"name": "Notification Bar", "system": "Storyblok", "needs_image": false, "fields": ["copy_text", "link_url", "background_color", "start_date", "end_date"]},
+    {"name": "PDP Promo Message", "system": "Dynamic Yield", "needs_image": false, "fields": ["copy_text", "conditions", "start_date", "end_date"]},
+    {"name": "Cart Progress Bar", "system": "Dynamic Yield", "needs_image": false, "fields": ["copy_text", "threshold_amount", "start_date", "end_date"]},
+    {"name": "Promotional Pop-up", "system": "Dynamic Yield", "needs_image": false, "fields": ["copy_text", "coupon_code", "start_date", "end_date"]},
+    {"name": "Recommendation Widget Header", "system": "Dynamic Yield", "needs_image": false, "fields": ["copy_text", "start_date", "end_date"]}
+  ]
+}

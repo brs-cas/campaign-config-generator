@@ -1,0 +1,7 @@
+{
+  "US": {"currency": "$", "timezone": "America/New_York", "sale_page_url": "/us/sale", "promo_suffix": "Free shipping on orders over $999", "notification_bg": "#1a2540"},
+  "AU": {"currency": "A$", "timezone": "Australia/Sydney", "sale_page_url": "/au/sale", "promo_suffix": "Free delivery on orders over A$1,499", "notification_bg": "#1a2540"},
+  "SG": {"currency": "S$", "timezone": "Asia/Singapore", "sale_page_url": "/sg/sale", "promo_suffix": "Free delivery on orders over S$999", "notification_bg": "#1a2540"},
+  "UK": {"currency": "£", "timezone": "Europe/London", "sale_page_url": "/uk/sale", "promo_suffix": "Free delivery on orders over £999", "notification_bg": "#1a2540"},
+  "CA": {"currency": "C$", "timezone": "America/Toronto", "sale_page_url": "/ca/sale", "promo_suffix": "Free shipping on orders over C$999", "notification_bg": "#1a2540"}
+}
