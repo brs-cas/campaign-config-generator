@@ -1,12 +1,15 @@
 from datetime import date, datetime
+from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, field_validator, model_validator
 
 from generator import CampaignConfigGenerator
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 app = FastAPI(title="Campaign Config Generator")
 
@@ -114,6 +117,11 @@ def _check_phase_overlaps(phases: list[Phase]) -> list[str]:
 
 
 # --- Endpoints ---
+
+
+@app.get("/", include_in_schema=False)
+def serve_frontend():
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 @app.get("/health")

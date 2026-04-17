@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Setup Generator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f6f3e7;
+  color: #2c2c2c;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+header {
+  background: #844025;
+  color: #fff;
+  padding: 24px 0;
+  text-align: center;
+}
+header h1 { font-size: 24px; font-weight: 600; letter-spacing: 0.3px; }
+
+.container {
+  max-width: 720px;
+  margin: 32px auto;
+  padding: 0 20px 60px;
+}
+
+/* --- Sections --- */
+.section {
+  background: #fff;
+  border: 1px solid #e0d6c2;
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #844025;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 16px;
+}
+
+/* --- Form controls --- */
+label.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+}
+input[type="text"], input[type="date"], textarea, select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #d25c1b;
+}
+textarea { resize: vertical; min-height: 70px; }
+.field-group { margin-bottom: 16px; }
+.field-row { display: flex; gap: 12px; }
+.field-row > .field-group { flex: 1; }
+
+/* --- Toggle buttons (campaign type) --- */
+.toggle-group { display: flex; gap: 10px; }
+.toggle-btn {
+  flex: 1;
+  padding: 14px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  color: #555;
+}
+.toggle-btn:hover { border-color: #d25c1b; }
+.toggle-btn.active {
+  border-color: #d25c1b;
+  background: #fdf1eb;
+  color: #d25c1b;
+}
+
+/* --- Market checkboxes --- */
+.market-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+.market-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+  font-size: 14px;
+}
+.market-item:hover { border-color: #d25c1b; }
+.market-item.checked {
+  border-color: #d25c1b;
+  background: #fdf1eb;
+}
+.market-item input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: #d25c1b; cursor: pointer;
+}
+.market-currency { color: #888; font-size: 12px; }
+.select-all-row {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+.select-all-row input { width: 15px; height: 15px; accent-color: #d25c1b; cursor: pointer; }
+
+/* --- Phases --- */
+.phase-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: #fafaf5;
+  border: 1px solid #e0d6c2;
+  border-radius: 6px;
+}
+.phase-row select { width: 160px; flex-shrink: 0; }
+.phase-row input[type="date"] { width: auto; flex: 1; }
+.phase-remove {
+  width: 30px; height: 30px;
+  border: none;
+  background: #ffebe6;
+  color: #c0392b;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.phase-remove:hover { background: #f5c6c0; }
+.add-phase-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border: 1.5px dashed #d25c1b;
+  border-radius: 6px;
+  background: transparent;
+  color: #d25c1b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.add-phase-btn:hover { background: #fdf1eb; }
+
+/* --- Collapsible --- */
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.collapsible-header .arrow {
+  font-size: 12px;
+  transition: transform 0.2s;
+  color: #999;
+}
+.collapsible-header .arrow.open { transform: rotate(90deg); }
+.collapsible-body { display: none; margin-top: 14px; }
+.collapsible-body.open { display: block; }
+.template-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.template-row select { flex: 1; }
+.small-btn {
+  padding: 8px 16px;
+  border: 1.5px solid #d25c1b;
+  border-radius: 6px;
+  background: #fff;
+  color: #d25c1b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.small-btn:hover { background: #fdf1eb; }
+.small-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* --- Preview --- */
+.preview {
+  background: #fff;
+  border: 2px solid #d25c1b;
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+.preview-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #844025;
+  margin-bottom: 12px;
+}
+.preview-stats { list-style: none; padding: 0; }
+.preview-stats li {
+  font-size: 14px;
+  padding: 4px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.preview-stats li::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #d25c1b;
+  flex-shrink: 0;
+  position: relative;
+  top: -1px;
+}
+.image-warning {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #FFF9C4;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #5d4e00;
+}
+
+/* --- Generate button --- */
+.generate-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #d25c1b;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 3px 12px rgba(210, 92, 27, 0.3);
+  letter-spacing: 0.3px;
+}
+.generate-btn:hover:not(:disabled) {
+  background: #b84e17;
+  box-shadow: 0 4px 16px rgba(210, 92, 27, 0.4);
+}
+.generate-btn:disabled {
+  background: #c4b8a8;
+  box-shadow: none;
+  cursor: default;
+}
+
+/* --- Toast --- */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #2e7d32;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.35s ease;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.error { background: #c62828; }
+
+/* --- Reminder checklist --- */
+.reminder {
+  background: #fff;
+  border: 1px solid #e0d6c2;
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-top: 20px;
+  display: none;
+}
+.reminder.visible { display: block; }
+.reminder-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #844025;
+  margin-bottom: 12px;
+}
+.reminder ol {
+  padding-left: 22px;
+  font-size: 14px;
+  color: #555;
+}
+.reminder ol li { padding: 4px 0; }
+
+/* --- Error state --- */
+.input-error { border-color: #c62828 !important; }
+.error-text { color: #c62828; font-size: 12px; margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Campaign Setup Generator</h1>
+</header>
+
+<div class="container">
+
+  <!-- Section 1: Campaign Details -->
+  <div class="section">
+    <div class="section-title">Campaign Details</div>
+    <div class="field-group">
+      <label class="field-label" for="campaignName">Campaign Name</label>
+      <input type="text" id="campaignName" placeholder="e.g. May Mega Sale 2026">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Campaign Type</label>
+      <div class="toggle-group">
+        <button type="button" class="toggle-btn active" data-type="bau" onclick="setCampaignType('bau')">BAU Sale</button>
+        <button type="button" class="toggle-btn" data-type="peak" onclick="setCampaignType('peak')">Peak Sale</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Markets -->
+  <div class="section">
+    <div class="section-title">Markets</div>
+    <label class="select-all-row">
+      <input type="checkbox" id="selectAll" onchange="toggleSelectAll()"> Select All
+    </label>
+    <div class="market-grid" id="marketGrid"></div>
+  </div>
+
+  <!-- Section 3: Schedule -->
+  <div class="section">
+    <div class="section-title">Schedule</div>
+    <div id="bauSchedule">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="bauStart">Start Date</label>
+          <input type="date" id="bauStart">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="bauEnd">End Date</label>
+          <input type="date" id="bauEnd">
+        </div>
+      </div>
+    </div>
+    <div id="peakSchedule" style="display:none">
+      <div id="phaseList"></div>
+      <button type="button" class="add-phase-btn" onclick="addPhase()">+ Add Phase</button>
+    </div>
+  </div>
+
+  <!-- Section 4: Content Defaults -->
+  <div class="section">
+    <div class="section-title">Content Defaults</div>
+    <div class="field-group">
+      <label class="field-label" for="promoText">Global Promo Text</label>
+      <textarea id="promoText" placeholder="e.g. Up to 50% off everything"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="couponCode">Coupon Code <span style="color:#999;font-weight:400">(optional)</span></label>
+      <input type="text" id="couponCode" placeholder="e.g. MAYSALE50">
+    </div>
+  </div>
+
+  <!-- Section 5: Load Previous -->
+  <div class="section">
+    <div class="collapsible-header" onclick="toggleCollapsible()">
+      <div class="section-title" style="margin-bottom:0">Load Previous</div>
+      <span class="arrow" id="collapseArrow">&#9654;</span>
+    </div>
+    <div class="collapsible-body" id="templateSection">
+      <div class="template-row">
+        <select id="templateSelect"><option value="">-- Select a saved template --</option></select>
+        <button type="button" class="small-btn" onclick="loadTemplate()">Load</button>
+      </div>
+      <button type="button" class="small-btn" onclick="saveTemplate()">Save Current as Template</button>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview" id="previewPanel">
+    <div class="preview-title">This campaign will generate:</div>
+    <ul class="preview-stats" id="previewStats"></ul>
+    <div class="image-warning" id="imageWarning"></div>
+  </div>
+
+  <!-- Generate -->
+  <button type="button" class="generate-btn" id="generateBtn" disabled onclick="generateSpreadsheet()">Generate Spreadsheet</button>
+
+  <!-- Reminder checklist -->
+  <div class="reminder" id="reminderChecklist">
+    <div class="reminder-title">Next Steps</div>
+    <ol>
+      <li>Fill in Cloudinary image URLs for yellow-highlighted cells</li>
+      <li>Review and customize promo copy for each market</li>
+      <li>Verify all phase dates are correct</li>
+      <li>Share completed spreadsheet with team for sign-off</li>
+      <li>Update Status column as each touchpoint is configured in Storyblok/DY</li>
+    </ol>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ------------------------------------------------------------------ */
+/*  State                                                             */
+/* ------------------------------------------------------------------ */
+let campaignType = 'bau';
+let touchpoints = [];
+let marketDefaults = {};
+const PHASE_OPTIONS = ['Early Access', 'Regular', 'Upsize', 'Dash', 'Custom'];
+const DEFAULT_PHASES = ['Early Access', 'Regular', 'Upsize', 'Dash'];
+const API = window.location.origin;
+
+/* ------------------------------------------------------------------ */
+/*  Init                                                              */
+/* ------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const [tpRes, mkRes] = await Promise.all([
+      fetch(API + '/config/touchpoints'),
+      fetch(API + '/config/markets')
+    ]);
+    touchpoints = (await tpRes.json()).touchpoints;
+    marketDefaults = await mkRes.json();
+  } catch (e) {
+    /* Fallback data so the page still works if API is unreachable */
+    touchpoints = [
+      {name:'Hero Banner',system:'Storyblok',needs_image:true},
+      {name:'Menu Navigation Banner',system:'Storyblok',needs_image:true},
+      {name:'Sale Navigation Tab',system:'Storyblok',needs_image:false},
+      {name:'Notification Bar',system:'Storyblok',needs_image:false},
+      {name:'PDP Promo Message',system:'Dynamic Yield',needs_image:false},
+      {name:'Cart Progress Bar',system:'Dynamic Yield',needs_image:false},
+      {name:'Promotional Pop-up',system:'Dynamic Yield',needs_image:false},
+      {name:'Recommendation Widget Header',system:'Dynamic Yield',needs_image:false}
+    ];
+    marketDefaults = {
+      US:{currency:'$'},AU:{currency:'A$'},SG:{currency:'S$'},UK:{currency:'\u00a3'},CA:{currency:'C$'}
+    };
+  }
+  renderMarkets();
+  renderPeakPhases();
+  refreshTemplateList();
+  updatePreview();
+
+  /* Listen for changes */
+  document.getElementById('campaignName').addEventListener('input', updatePreview);
+  document.getElementById('bauStart').addEventListener('change', updatePreview);
+  document.getElementById('bauEnd').addEventListener('change', updatePreview);
+  document.getElementById('promoText').addEventListener('input', updatePreview);
+  document.getElementById('couponCode').addEventListener('input', updatePreview);
+});
+
+/* ------------------------------------------------------------------ */
+/*  Campaign type toggle                                              */
+/* ------------------------------------------------------------------ */
+function setCampaignType(type) {
+  campaignType = type;
+  document.querySelectorAll('.toggle-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.type === type);
+  });
+  document.getElementById('bauSchedule').style.display = type === 'bau' ? '' : 'none';
+  document.getElementById('peakSchedule').style.display = type === 'peak' ? '' : 'none';
+  updatePreview();
+}
+
+/* ------------------------------------------------------------------ */
+/*  Markets                                                           */
+/* ------------------------------------------------------------------ */
+function renderMarkets() {
+  const grid = document.getElementById('marketGrid');
+  grid.innerHTML = '';
+  Object.entries(marketDefaults).forEach(([code, info]) => {
+    const item = document.createElement('label');
+    item.className = 'market-item';
+    item.innerHTML = `<input type="checkbox" value="${code}" onchange="onMarketChange()"> ${code} <span class="market-currency">(${info.currency})</span>`;
+    grid.appendChild(item);
+  });
+}
+
+function onMarketChange() {
+  const boxes = document.querySelectorAll('#marketGrid input[type=checkbox]');
+  boxes.forEach(cb => {
+    cb.closest('.market-item').classList.toggle('checked', cb.checked);
+  });
+  const all = Array.from(boxes).every(cb => cb.checked);
+  document.getElementById('selectAll').checked = all;
+  updatePreview();
+}
+
+function toggleSelectAll() {
+  const on = document.getElementById('selectAll').checked;
+  document.querySelectorAll('#marketGrid input[type=checkbox]').forEach(cb => {
+    cb.checked = on;
+    cb.closest('.market-item').classList.toggle('checked', on);
+  });
+  updatePreview();
+}
+
+function getSelectedMarkets() {
+  return Array.from(document.querySelectorAll('#marketGrid input[type=checkbox]:checked')).map(cb => cb.value);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Phases (Peak)                                                     */
+/* ------------------------------------------------------------------ */
+function renderPeakPhases() {
+  const list = document.getElementById('phaseList');
+  list.innerHTML = '';
+  DEFAULT_PHASES.forEach(name => addPhaseRow(name, '', ''));
+}
+
+function addPhase() { addPhaseRow('', '', ''); }
+
+function addPhaseRow(name, start, end) {
+  const list = document.getElementById('phaseList');
+  const row = document.createElement('div');
+  row.className = 'phase-row';
+  const opts = PHASE_OPTIONS.map(o => `<option value="${o}"${o === name ? ' selected' : ''}>${o}</option>`).join('');
+  row.innerHTML =
+    `<select onchange="updatePreview()">${opts}</select>` +
+    `<input type="date" value="${start}" placeholder="Start" onchange="updatePreview()">` +
+    `<input type="date" value="${end}" placeholder="End" onchange="updatePreview()">` +
+    `<button type="button" class="phase-remove" onclick="removePhase(this)" title="Remove phase">&times;</button>`;
+  list.appendChild(row);
+  updatePreview();
+}
+
+function removePhase(btn) {
+  btn.closest('.phase-row').remove();
+  updatePreview();
+}
+
+function getPhases() {
+  if (campaignType === 'bau') {
+    const s = document.getElementById('bauStart').value;
+    const e = document.getElementById('bauEnd').value;
+    return [{ name: 'Main', start_date: s, end_date: e }];
+  }
+  const rows = document.querySelectorAll('#phaseList .phase-row');
+  return Array.from(rows).map(row => {
+    const sel = row.querySelector('select');
+    const dates = row.querySelectorAll('input[type=date]');
+    return { name: sel.value, start_date: dates[0].value, end_date: dates[1].value };
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Templates                                                         */
+/* ------------------------------------------------------------------ */
+function toggleCollapsible() {
+  const body = document.getElementById('templateSection');
+  const arrow = document.getElementById('collapseArrow');
+  const open = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+}
+
+async function refreshTemplateList() {
+  try {
+    const res = await fetch(API + '/templates');
+    const data = await res.json();
+    const sel = document.getElementById('templateSelect');
+    sel.innerHTML = '<option value="">-- Select a saved template --</option>';
+    (data.templates || []).forEach(t => {
+      sel.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+  } catch (e) { /* silent */ }
+}
+
+async function loadTemplate() {
+  const sel = document.getElementById('templateSelect');
+  if (!sel.value) return;
+  try {
+    const res = await fetch(API + '/templates/' + encodeURIComponent(sel.value));
+    const cfg = await res.json();
+    /* Fill form */
+    if (cfg.campaign_name) document.getElementById('campaignName').value = cfg.campaign_name;
+    if (cfg.campaign_type) setCampaignType(cfg.campaign_type);
+    if (cfg.global_promo_text) document.getElementById('promoText').value = cfg.global_promo_text;
+    if (cfg.coupon_code) document.getElementById('couponCode').value = cfg.coupon_code;
+    /* Markets */
+    document.querySelectorAll('#marketGrid input[type=checkbox]').forEach(cb => {
+      cb.checked = (cfg.markets || []).includes(cb.value);
+      cb.closest('.market-item').classList.toggle('checked', cb.checked);
+    });
+    /* Phases */
+    if (cfg.campaign_type === 'peak' && cfg.phases) {
+      document.getElementById('phaseList').innerHTML = '';
+      cfg.phases.forEach(p => addPhaseRow(p.name, p.start_date, p.end_date));
+    } else if (cfg.phases && cfg.phases.length) {
+      document.getElementById('bauStart').value = cfg.phases[0].start_date || '';
+      document.getElementById('bauEnd').value = cfg.phases[0].end_date || '';
+    }
+    updatePreview();
+    showToast('Template loaded');
+  } catch (e) {
+    showToast('Failed to load template', true);
+  }
+}
+
+async function saveTemplate() {
+  const name = document.getElementById('campaignName').value.trim();
+  if (!name) { showToast('Enter a campaign name first', true); return; }
+  const config = buildConfig();
+  try {
+    const res = await fetch(API + '/templates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ campaign_name: name, config })
+    });
+    const data = await res.json();
+    showToast('Template saved as ' + data.filename);
+    refreshTemplateList();
+  } catch (e) {
+    showToast('Failed to save template', true);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Preview                                                           */
+/* ------------------------------------------------------------------ */
+function updatePreview() {
+  const markets = getSelectedMarkets();
+  const phases = getPhases();
+  const numMarkets = markets.length;
+  const numTouchpoints = touchpoints.length;
+  const numPhases = phases.length;
+  const total = numMarkets * numTouchpoints * numPhases;
+
+  const stats = document.getElementById('previewStats');
+  if (numMarkets === 0 && !document.getElementById('campaignName').value.trim()) {
+    stats.innerHTML = '<li style="color:#999">Fill in the form above to see a preview</li>';
+    document.getElementById('imageWarning').style.display = 'none';
+    document.getElementById('generateBtn').disabled = true;
+    return;
+  }
+
+  stats.innerHTML =
+    `<li><strong>${numMarkets}</strong> market sheet${numMarkets !== 1 ? 's' : ''} (${markets.join(', ') || 'none selected'})</li>` +
+    `<li><strong>${numTouchpoints}</strong> touchpoints per phase</li>` +
+    `<li><strong>${numPhases}</strong> phase${numPhases !== 1 ? 's' : ''} (${phases.map(p => p.name).join(', ')})</li>` +
+    `<li><strong>Total: ${total}</strong> configuration items</li>`;
+
+  const needImage = touchpoints.filter(t => t.needs_image).map(t => t.name);
+  const warn = document.getElementById('imageWarning');
+  if (needImage.length) {
+    warn.style.display = '';
+    warn.textContent = 'Images needed for: ' + needImage.join(', ');
+  } else {
+    warn.style.display = 'none';
+  }
+
+  /* Enable/disable generate button */
+  const nameOk = document.getElementById('campaignName').value.trim().length > 0;
+  const marketsOk = numMarkets > 0;
+  document.getElementById('generateBtn').disabled = !(nameOk && marketsOk);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Build config payload                                              */
+/* ------------------------------------------------------------------ */
+function buildConfig() {
+  return {
+    campaign_name: document.getElementById('campaignName').value.trim(),
+    campaign_type: campaignType,
+    markets: getSelectedMarkets(),
+    phases: getPhases(),
+    global_promo_text: document.getElementById('promoText').value.trim(),
+    coupon_code: document.getElementById('couponCode').value.trim() || null
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Validate                                                          */
+/* ------------------------------------------------------------------ */
+function validate() {
+  let ok = true;
+  /* Clear old errors */
+  document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+  document.querySelectorAll('.error-text').forEach(el => el.remove());
+
+  function addError(el, msg) {
+    el.classList.add('input-error');
+    const span = document.createElement('div');
+    span.className = 'error-text';
+    span.textContent = msg;
+    el.parentNode.appendChild(span);
+    ok = false;
+  }
+
+  const nameEl = document.getElementById('campaignName');
+  if (!nameEl.value.trim()) addError(nameEl, 'Campaign name is required');
+
+  if (getSelectedMarkets().length === 0) {
+    /* Highlight the market grid area */
+    showToast('Select at least one market', true);
+    ok = false;
+  }
+
+  const phases = getPhases();
+  phases.forEach((p, i) => {
+    if (!p.start_date || !p.end_date) {
+      if (campaignType === 'bau') {
+        if (!p.start_date) addError(document.getElementById('bauStart'), 'Start date is required');
+        if (!p.end_date) addError(document.getElementById('bauEnd'), 'End date is required');
+      } else {
+        const rows = document.querySelectorAll('#phaseList .phase-row');
+        if (rows[i]) {
+          const dates = rows[i].querySelectorAll('input[type=date]');
+          if (!p.start_date) addError(dates[0], 'Required');
+          if (!p.end_date) addError(dates[1], 'Required');
+        }
+      }
+    } else if (p.end_date <= p.start_date) {
+      if (campaignType === 'bau') {
+        addError(document.getElementById('bauEnd'), 'End date must be after start date');
+      } else {
+        const rows = document.querySelectorAll('#phaseList .phase-row');
+        if (rows[i]) addError(rows[i].querySelectorAll('input[type=date]')[1], 'Must be after start');
+      }
+    }
+  });
+
+  if (campaignType === 'peak' && phases.length === 0) {
+    showToast('Add at least one phase for a Peak sale', true);
+    ok = false;
+  }
+
+  return ok;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Generate                                                          */
+/* ------------------------------------------------------------------ */
+async function generateSpreadsheet() {
+  if (!validate()) return;
+
+  const btn = document.getElementById('generateBtn');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  try {
+    const config = buildConfig();
+    const res = await fetch(API + '/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Server error' }));
+      const msg = err.detail || (Array.isArray(err) ? err.map(e => e.msg).join(', ') : 'Generation failed');
+      throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    }
+
+    /* Check for overlap warnings */
+    const warnings = res.headers.get('X-Warnings');
+    if (warnings) showToast('Warning: ' + warnings, true);
+
+    /* Trigger download */
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    a.download = match ? match[1] : config.campaign_name.replace(/\s+/g, '_') + '_config.xlsx';
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    showToast('Spreadsheet downloaded! Open it and fill in the yellow cells.');
+    document.getElementById('reminderChecklist').classList.add('visible');
+  } catch (e) {
+    showToast(e.message || 'Generation failed', true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+    updatePreview();
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Toast                                                             */
+/* ------------------------------------------------------------------ */
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  /* Force reflow to restart animation if already showing */
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), isError ? 4000 : 3000);
+}
+</script>
+</body>
+</html>
