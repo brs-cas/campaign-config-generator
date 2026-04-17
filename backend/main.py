@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -19,6 +19,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Warnings", "Content-Disposition"],
 )
 
 generator = CampaignConfigGenerator()
@@ -31,6 +32,13 @@ class Phase(BaseModel):
     name: str
     start_date: str
     end_date: str
+
+    @field_validator("name")
+    @classmethod
+    def name_not_empty(cls, v):
+        if not v.strip():
+            raise ValueError("Phase name must not be empty")
+        return v.strip()
 
     @field_validator("end_date")
     @classmethod

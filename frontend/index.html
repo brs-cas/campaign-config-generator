@@ -135,11 +135,25 @@ textarea { resize: vertical; min-height: 70px; }
 .select-all-row input { width: 15px; height: 15px; accent-color: #d25c1b; cursor: pointer; }
 
 /* --- Phases --- */
+.phase-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.phase-header-name { width: 160px; flex-shrink: 0; }
+.phase-header-date { flex: 1; }
+.phase-header-spacer { width: 30px; flex-shrink: 0; }
 .phase-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   padding: 10px 12px;
   background: #fafaf5;
   border: 1px solid #e0d6c2;
@@ -377,6 +391,12 @@ textarea { resize: vertical; min-height: 70px; }
       </div>
     </div>
     <div id="peakSchedule" style="display:none">
+      <div class="phase-header">
+        <span class="phase-header-name">Phase</span>
+        <span class="phase-header-date">Start Date</span>
+        <span class="phase-header-date">End Date</span>
+        <span class="phase-header-spacer"></span>
+      </div>
       <div id="phaseList"></div>
       <button type="button" class="add-phase-btn" onclick="addPhase()">+ Add Phase</button>
     </div>
@@ -515,12 +535,14 @@ function renderMarkets() {
 }
 
 function onMarketChange() {
-  const boxes = document.querySelectorAll('#marketGrid input[type=checkbox]');
+  const boxes = Array.from(document.querySelectorAll('#marketGrid input[type=checkbox]'));
   boxes.forEach(cb => {
     cb.closest('.market-item').classList.toggle('checked', cb.checked);
   });
-  const all = Array.from(boxes).every(cb => cb.checked);
-  document.getElementById('selectAll').checked = all;
+  const checkedCount = boxes.filter(cb => cb.checked).length;
+  const selectAll = document.getElementById('selectAll');
+  selectAll.checked = checkedCount === boxes.length;
+  selectAll.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
   updatePreview();
 }
 
@@ -543,23 +565,23 @@ function getSelectedMarkets() {
 function renderPeakPhases() {
   const list = document.getElementById('phaseList');
   list.innerHTML = '';
-  DEFAULT_PHASES.forEach(name => addPhaseRow(name, '', ''));
+  DEFAULT_PHASES.forEach(name => addPhaseRow(name, '', '', false));
 }
 
-function addPhase() { addPhaseRow('', '', ''); }
+function addPhase() { addPhaseRow('Custom', '', '', true); }
 
-function addPhaseRow(name, start, end) {
+function addPhaseRow(name, start, end, triggerUpdate = true) {
   const list = document.getElementById('phaseList');
   const row = document.createElement('div');
   row.className = 'phase-row';
   const opts = PHASE_OPTIONS.map(o => `<option value="${o}"${o === name ? ' selected' : ''}>${o}</option>`).join('');
   row.innerHTML =
     `<select onchange="updatePreview()">${opts}</select>` +
-    `<input type="date" value="${start}" placeholder="Start" onchange="updatePreview()">` +
-    `<input type="date" value="${end}" placeholder="End" onchange="updatePreview()">` +
+    `<input type="date" value="${start}" onchange="updatePreview()">` +
+    `<input type="date" value="${end}" onchange="updatePreview()">` +
     `<button type="button" class="phase-remove" onclick="removePhase(this)" title="Remove phase">&times;</button>`;
   list.appendChild(row);
-  updatePreview();
+  if (triggerUpdate) updatePreview();
 }
 
 function removePhase(btn) {
@@ -786,8 +808,14 @@ async function generateSpreadsheet() {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Server error' }));
-      const msg = err.detail || (Array.isArray(err) ? err.map(e => e.msg).join(', ') : 'Generation failed');
-      throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      let msg = 'Generation failed';
+      if (typeof err.detail === 'string') {
+        msg = err.detail;
+      } else if (Array.isArray(err.detail)) {
+        // FastAPI validation errors: [{loc, msg, type}, ...]
+        msg = err.detail.map(e => e.msg.replace(/^Value error, /, '')).join('\n');
+      }
+      throw new Error(msg);
     }
 
     /* Check for overlap warnings */

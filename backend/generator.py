@@ -1,5 +1,4 @@
 import json
-import os
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -188,7 +187,8 @@ class CampaignConfigGenerator:
         """Save a campaign config as a reusable JSON template."""
         TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
         date_str = datetime.now().strftime("%Y%m%d")
-        filename = f"{campaign_name}_{date_str}.json"
+        safe_name = "".join(c if c.isalnum() or c in "-_" else "_" for c in campaign_name).strip("_")
+        filename = f"{safe_name}_{date_str}.json"
         filepath = TEMPLATES_DIR / filename
         with open(filepath, "w") as f:
             json.dump(config, f, indent=2)
@@ -201,6 +201,8 @@ class CampaignConfigGenerator:
 
     def load_template(self, filename: str) -> dict:
         """Read and return a saved template."""
-        filepath = TEMPLATES_DIR / filename
+        filepath = (TEMPLATES_DIR / filename).resolve()
+        if not str(filepath).startswith(str(TEMPLATES_DIR.resolve())):
+            raise FileNotFoundError("Invalid filename")
         with open(filepath) as f:
             return json.load(f)
